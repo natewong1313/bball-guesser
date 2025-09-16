@@ -1,0 +1,148 @@
+<main phx-hook="LocalStateStore" id="main">
+  <Layouts.flash_group flash={@flash} />
+  <div class="bg-base-200 h-20 w-full flex items-center px-8 justify-between">
+    <div>
+      <h1 class="text-xl font-medium">BBall Guesser</h1>
+      <p class="text-base-content/70">
+        A basketball player guessing game. Made with <span class="text-white">🧡</span>
+        by
+        <a
+          href="https://github.com/natewong1313/bball-guesser"
+          target="_blank"
+          class="hover:underline"
+        >
+          Nate
+        </a>
+      </p>
+    </div>
+    <Layouts.theme_toggle />
+  </div>
+  <div class="px-8 py-28">
+    <div class="grid grid-cols-3 gap-4">
+      <div class="space-y-2">
+        <div class="bg-base-200 rounded-box flex items-center justify-center p-2">
+          <img
+            src={@player.image_url}
+            class={"drop-shadow-lg select-none events-none h-64 w-full #{if Enum.any?(@guesses, fn guess -> guess.name == @player.name end), do: "", else: "brightness-0"}"}
+            draggable="false"
+          />
+        </div>
+        <.form for={@search_form} phx-change="search" phx-submit="search">
+          <.input
+            field={@search_form[:name]}
+            type="text"
+            placeholder="Start typing to search for a players name"
+            name="name"
+          />
+        </.form>
+        <%= if Enum.empty?(@search_results) do %>
+          <p class="text-base-content/70 text-sm">Player name results will appear here</p>
+        <% else %>
+          <ul class="list">
+            <%= for item <- @search_results do %>
+              <li
+                class="list-row cursor-pointer"
+                phx-click="guess"
+                phx-value-name={item.name}
+                phx-keydown="guess"
+                phx-key="enter"
+                tabindex="0"
+              >
+                {item.name}
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      </div>
+      <div class="col-span-2">
+        <.table id="guesses" rows={@guesses}>
+          <:col :let={guess} label="Name">
+            <%= if guess.name == @player.name do %>
+              <span class="badge badge-success truncate text-xs">{guess.name}</span>
+            <% else %>
+              {guess.name}
+            <% end %>
+          </:col>
+          <:col :let={guess} label="Team">
+            <%= if guess.team_name == @player.team_name do %>
+              <span class="badge badge-success text-xs">{guess.team_name}</span>
+            <% else %>
+              {guess.team_name}
+            <% end %>
+          </:col>
+          <:col :let={guess} label="Conference">
+            <%= if guess.conference == @player.conference do %>
+              <span class="badge badge-success text-xs">{guess.conference}</span>
+            <% else %>
+              {guess.conference}
+            <% end %>
+          </:col>
+          <:col :let={guess} label="Division">
+            <%= if guess.division == @player.division do %>
+              <span class="badge badge-success text-xs">{guess.division}</span>
+            <% else %>
+              {guess.division}
+            <% end %>
+          </:col>
+          <:col :let={guess} label="Position">
+            <%= if guess.positions == @player.positions do %>
+              <span class="badge badge-success text-xs">{Enum.join(guess.positions, "/")}</span>
+            <% else %>
+              <%= if Enum.any?(guess.positions, fn pos -> pos in @player.positions end) do %>
+                <span class="badge badge-warning text-xs">{Enum.join(guess.positions, "/")}</span>
+              <% else %>
+                {Enum.join(guess.positions, "/")}
+              <% end %>
+            <% end %>
+          </:col>
+          <:col :let={guess} label="Height">
+            <% {feet, inches} = to_feet_and_inches(guess.height) %>
+            <%= if guess.height == @player.height do %>
+              <span class="badge badge-success text-xs">{feet}'{inches}"</span>
+            <% else %>
+              <%= if abs(guess.height - @player.height) <= 2 do %>
+                <span class="badge badge-warning text-sm">
+                  {feet}'{inches}" {if guess.height > @player.height, do: "↓", else: "↑"}
+                </span>
+              <% else %>
+                <span>
+                  {feet}'{inches}" {if guess.height > @player.height, do: "↓", else: "↑"}
+                </span>
+              <% end %>
+            <% end %>
+          </:col>
+          <:col :let={guess} label="Age">
+            <%= if guess.age == @player.age do %>
+              <span class="badge badge-success text-xs">{guess.age}</span>
+            <% else %>
+              <%= if abs(guess.age - @player.age) <= 2 do %>
+                <span class="badge badge-warning text-sm">
+                  {guess.age} {if guess.age > @player.age, do: "↓", else: "↑"}
+                </span>
+              <% else %>
+                <span>
+                  {guess.age} {if guess.age > @player.age, do: "↓", else: "↑"}
+                </span>
+              <% end %>
+            <% end %>
+          </:col>
+          <:col :let={guess} label="Number">
+            <%= if guess.number == @player.number do %>
+              <span class="badge badge-success text-xs">{guess.number}</span>
+            <% else %>
+              <%= if abs(guess.number - @player.number) <= 2 do %>
+                <span class="badge badge-warning text-sm">
+                  {guess.number} {if guess.number > @player.number, do: "↓", else: "↑"}
+                </span>
+              <% else %>
+                <span>
+                  {guess.number} {if guess.number > @player.number, do: "↓", else: "↑"}
+                </span>
+              <% end %>
+            <% end %>
+          </:col>
+        </.table>
+      </div>
+    </div>
+  </div>
+</main>

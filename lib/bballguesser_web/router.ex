@@ -17,7 +17,8 @@ defmodule BballguesserWeb.Router do
   scope "/", BballguesserWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    # get "/", PageController, :home
+    live "/", GameLive
   end
 
   # Other scopes may use custom stacks.
